@@ -35,4 +35,8 @@
             <h1>No Products Found!</h1>
         <% } %>
     </main>
-<%- include('../includes/end2.ejs') %>
+    <% if (prods.length > 0) { %>
+        <%- include('../includes/end2.ejs') %>
+    <% } else { %>
+        <%- include('../includes/end.ejs') %>
+    <% } %>
