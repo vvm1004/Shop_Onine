@@ -7,19 +7,44 @@ const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const csrf = require('csurf');
 const flash = require('connect-flash');
+const multer = require('multer');
+
 
 const errorController = require('./controllers/error');
 const User = require('./models/user');
 
-const app = express();
-
 const MONGODB_URL = 'mongodb+srv://vvm1004:test123@cluster0.4a2h5sc.mongodb.net/shop?retryWrites=true&w=majority'
+
+const app = express();
 const store = new MongoDBStore({
   uri: MONGODB_URL,
   collection: 'sessions'
 });
 
 const csrfProtection = csrf();
+
+const storage = multer.diskStorage({
+  destination: function (req, file, callback) {
+      callback(null, __dirname + '/images');
+  },
+  // Sets file(s) to be saved in uploads folder in same directory
+  filename: function (req, file, callback) {
+      callback(null, file.originalname);
+  }
+  // Sets saved filename(s) to be original filename(s)
+})
+
+const fileFilter = (req, file, cb) => {
+  if (
+    file.mimetype === 'image/png' ||
+    file.mimetype === 'image/jpg' ||
+    file.mimetype === 'image/jpeg'
+  ) {
+    cb(null, true);
+  } else {
+    cb(null, false);
+  }
+};
 
 app.set('view engine', 'ejs');
 app.set('views', 'views');
@@ -30,7 +55,12 @@ const authRoutes = require('./routes/auth');
 
 
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(
+  multer({ storage: storage, fileFilter: fileFilter }).single('image')
+);
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/images', express.static(path.join(__dirname, 'images')));
+
 app.use(session({
   secret: 'my secret',
   resave: false,
@@ -42,29 +72,28 @@ app.use(csrfProtection);
 app.use(flash());
 
 app.use((req, res, next) => {
-  res.locals.isAuthenticated = req.session.isLoggedIn,
-  res.locals.csrfToken = req.csrfToken()
-  next()
-})
+  res.locals.isAuthenticated = req.session.isLoggedIn;
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
 
 app.use((req, res, next) => {
-  // throw new Error('Sync Dummy')
+  // throw new Error('Sync Dummy');
   if (!req.session.user) {
     return next();
   }
   User.findById(req.session.user._id)
     .then(user => {
-      if(!user){
+      if (!user) {
         return next();
       }
       req.user = user;
       next();
     })
     .catch(err => {
-      next(new Error(err))
+      next(new Error(err));
     });
 });
-
 
 
 app.use('/admin', adminRoutes);
@@ -74,15 +103,26 @@ app.use(authRoutes);
 app.get('/500', errorController.get500);
 app.use(errorController.get404);
 
+
+
 app.use((error, req, res, next) => {
-  //res.status(error.httpStatusCode).render(...);
-  // res.redirect('/500');
+  const isAuthenticated = req.session ? req.session.isLoggedIn : false;
   res.status(500).render('500', {
     pageTitle: 'Error!',
     path: '/500',
-    isAuthenticated: req.session.isLoggedIn
+    isAuthenticated: isAuthenticated
   });
 })
+
+// app.use((error, req, res, next) => {
+//   // res.status(error.httpStatusCode).render(...);
+//   // res.redirect('/500');
+//   res.status(500).render('500', {
+//     pageTitle: 'Error!',
+//     path: '/500',
+//     isAuthenticated: req.session.isLoggedIn
+//   });
+// });
 
 mongoose.connect(MONGODB_URL)
 // mongoose.connect("mongodb://127.0.0.1:27017/shop")
