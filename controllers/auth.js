@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const { validationResult } = require('express-validator');
+const passport = require('passport');
 
 
 const User = require('../models/user');
@@ -11,8 +12,8 @@ const transporter = nodemailer.createTransport({
   port: 465,
   secure: true,
   auth: {
-    user: process.env.USER,
-    pass: process.env.PASSWORd,
+    user: "vovanminhv23@gmail.com",
+    pass: "eehu trwl yije oats",
   },
 });
 
@@ -158,7 +159,7 @@ exports.postSignup = (req, res, next) => {
       res.redirect('/login');
       return transporter.sendMail({
         to: email,
-        from: process.env.User,
+        from: 'vovanminhv23@gmail.com',
         subject: 'Signup succeeded!',
         html: '<h1>You successfully signed up!</h1>'
       });
@@ -209,16 +210,16 @@ exports.postReset = (req, res, next) => {
         return user.save();
       })
       .then(result => {
+        res.redirect('/');
         transporter.sendMail({
           to: req.body.email,
-          from: process.env.USER,
+          from: 'vovanminhv23@gmail.com',
           subject: 'Password reset',
           html: `
-          <p>You requested a password reset</p>
-          <p>Click this <a href="http://localhost:3000/reset/${token}">link</a> to set a new password.</p>
+            <p>You requested a password reset</p>
+            <p>Click this <a href="http://localhost:3000/reset/${token}">link</a> to set a new password.</p>
           `
         });
-        res.redirect('/');
       })
       .catch(err => {
         const error = new Error(err);
@@ -227,6 +228,7 @@ exports.postReset = (req, res, next) => {
       });
   });
 };
+
 exports.getNewPassword = (req, res, next) => {
   const token = req.params.token;
   User.findOne({ resetToken: token, resetTokenExpiration: { $gt: Date.now() } })
@@ -282,3 +284,7 @@ exports.postNewPassword = (req, res, next) => {
       return next(error);
     });
 };
+
+// exports.getGoogle = () => {
+//   passport.authenticate('google', { scope: ['profile'] });
+// };

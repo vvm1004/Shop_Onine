@@ -1,15 +1,15 @@
 const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
+const findOrCreate = require('mongoose-findorcreate')
+
 
 const userSchema = new Schema({
   email: {
     type: String,
-    required: true
   },
   password: {
     type: String,
-    required: true,
   },
   resetToken: String,
   resetTokenExpiration: Date,
@@ -20,7 +20,8 @@ const userSchema = new Schema({
         quantity: { type: Number, required: true }
       }
     ]
-  }
+  },
+  googleId: String,
 });
 
 userSchema.methods.addToCart = function(product){
@@ -57,6 +58,8 @@ userSchema.methods.clearCart = function () {
   this.cart = {items: []};
   return this.save();
 }
+userSchema.plugin(findOrCreate);
+
 
 module.exports = mongoose.model('User', userSchema);
 
