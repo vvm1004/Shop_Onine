@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const mongooseDelete = require('mongoose-delete');
 
 const productSchema = new Schema({
   title: {
@@ -24,6 +25,11 @@ const productSchema = new Schema({
     required: true
   }
 });
+productSchema.plugin(mongooseDelete, {
+  deletedAt: true,
+  overrideMethods: 'all',
+});
+
 module.exports = mongoose.model('Product', productSchema);
 
 // const getDb = require('../util/database').getDb;

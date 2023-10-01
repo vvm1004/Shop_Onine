@@ -8,8 +8,8 @@
 
             <main>
                 <div>
-                    <a class="recycle-bin-link" href="/admin/trash-products">
-                        <i class="fas fa-trash"></i> <span class="bin-text">Recycle Bin</span>
+                    <a href="/admin/products" class="back-link">
+                        <i class="fas fa-arrow-left"></i> My Admin Products
                     </a>
                 </div>
                 <% if (prods.length> 0) { %>
@@ -33,12 +33,16 @@
                                     </p>
                                 </div>
                                 <div class="card__actions">
-                                    <a href="/admin/edit-product/<%= product._id %>?edit=true" class="btn">Edit</a>
-                                    <form action="/admin/delete-product" method="POST">
+                                    <form action="/admin/restore" method="POST">
+                                        <input type="hidden" value="<%= product._id %>" name="productId">
+                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                        <button class="btn" type="submit">Restore</button>
+                                    </form>
+                                    <form action="/admin/forcedelete-product" method="POST">
                                         <input type="hidden" value="<%= product._id %>" name="productId">
                                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                         <button class="btn" type="submit">Delete</button>
-                                    </form>
+                                    </form> 
                                 </div>
                             </article>
                             <% } %>
@@ -47,7 +51,7 @@
                         previousPage: previousPage, lastPage: lastPage, hasNextPage: hasNextPage, hasPreviousPage:
                         hasPreviousPage}) %>
                         <% } else { %>
-                            <h1>No Products Found!</h1>
+                            <h1>Empty Trash Can!</h1>
                             <% } %>
             </main>
             <% if (prods.length> 0) { %>
@@ -55,4 +59,3 @@
                     <% } else { %>
                         <%- include('../includes/end.ejs') %>
                             <% } %>
-                                <!-- <script src="/js/admin.js"></script> -->

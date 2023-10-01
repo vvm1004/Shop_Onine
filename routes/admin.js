@@ -14,6 +14,12 @@ router.get('/add-product', isAuth, adminController.getAddProduct);
 // // /admin/products => GET
 router.get('/products', isAuth, adminController.getProducts);
 
+// // /admin/trash-product => GET
+router.get('/trash-products', isAuth, adminController.getTrashProduct);
+
+router.post('/restore', isAuth, adminController.postRestore);
+
+
 // // /admin/add-product => POST
 router.post(
     '/add-product',
@@ -51,5 +57,7 @@ router.post(
     adminController.postEditProduct
   );
   router.post('/delete-product', isAuth, adminController.postDeleteProduct);
+  router.post('/forcedelete-product', isAuth, adminController.postForceDeleteProduct);
+
 
 module.exports = router;

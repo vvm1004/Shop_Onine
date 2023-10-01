@@ -189,6 +189,19 @@ exports.getProducts = (req, res, next) => {
 
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
+  Product.delete({ _id: prodId, userId: req.user._id })
+    .then(() => {
+      res.redirect('/admin/products');
+    })
+    .catch(err => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
+};
+
+exports.postForceDeleteProduct = (req, res, next) => {
+  const prodId = req.body.productId;
   Product.deleteOne({ _id: prodId, userId: req.user._id })
     .then(() => {
       console.log('DESTROYED PRODUCT');
@@ -199,4 +212,51 @@ exports.postDeleteProduct = (req, res, next) => {
       error.httpStatusCode = 500;
       return next(error);
     });
+};
+
+
+exports.getTrashProduct = (req, res, next) => {
+  const page = +req.query.page || 1;
+  let totalItems;
+
+  Product.findWithDeleted({ userId: req.user._id, deleted : true })
+    .countDocuments()
+    .then(numProducts => {
+      totalItems = numProducts;
+      return Product.findWithDeleted({ userId: req.user._id, deleted:true })
+        .skip((page - 1) * ITEMS_PER_PAGE)
+        .limit(ITEMS_PER_PAGE);
+    })
+    .then(products => {
+      res.render('admin/trash-products', {
+        prods: products,
+        pageTitle: 'Trash Product',
+        path: '/admin/products',
+        currentPage: page,
+        hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+        hasPreviousPage: page > 1,
+        nextPage: page + 1,
+        previousPage: page - 1,
+        lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
+      });
+    })
+    .catch(err => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
+};
+
+
+exports.postRestore = (req, res, next) => {
+  const prodId = req.body.productId;
+   Product.restore({ _id: prodId, userId: req.user._id })
+     .then(() => {
+       res.redirect('/admin/products');
+     })
+     .catch(err => {
+       const error = new Error(err);
+       error.httpStatusCode = 500;
+       return next(error);
+     });
 };

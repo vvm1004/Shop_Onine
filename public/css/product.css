@@ -25,3 +25,29 @@
 .product__description {
     text-align: center;
 }
+
+a.recycle-bin-link {
+    color: #007bff; 
+    text-decoration: none; 
+}
+
+a.recycle-bin-link:hover {
+    text-decoration: underline; 
+}
+
+
+i.fas.fa-trash {
+    margin-right: 5px; 
+    color: #d9534f; 
+}
+
+.back-link {
+    text-decoration: none;
+    color: #007bff; 
+    margin-bottom: 10px;
+  }
+  
+  .back-link:hover {
+    text-decoration: underline;
+  }
+  
