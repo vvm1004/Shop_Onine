@@ -15,7 +15,7 @@ router.get('/add-product', isAuth, adminController.getAddProduct);
 router.get('/products', isAuth, adminController.getProducts);
 
 // // /admin/trash-product => GET
-router.get('/trash-products', isAuth, adminController.getTrashProduct);
+router.get('/trash-products', isAuth, adminController.getTrashProducts);
 
 router.post('/restore', isAuth, adminController.postRestore);
 

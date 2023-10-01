@@ -157,15 +157,19 @@ exports.postEditProduct = (req, res, next) => {
 exports.getProducts = (req, res, next) => {
   const page = +req.query.page || 1;
   let totalItems;
+  let deletedCount; // Định nghĩa biến deletedCount ở đầu hàm
+
   Product.find({ userId: req.user._id })
-    // .select('title price -_id')
-    // .populate('userId', 'name')
     .countDocuments()
     .then(numProducts => {
       totalItems = numProducts;
+      return Product.countWithDeleted({ deleted: true }); // Đếm số sản phẩm đã bị xóa
+    })
+    .then(count => {
+      deletedCount = count; // Lưu số sản phẩm đã bị xóa vào biến deletedCount
       return Product.find({ userId: req.user._id })
         .skip((page - 1) * ITEMS_PER_PAGE)
-        .limit(ITEMS_PER_PAGE)
+        .limit(ITEMS_PER_PAGE);
     })
     .then(products => {
       res.render('admin/products', {
@@ -178,6 +182,7 @@ exports.getProducts = (req, res, next) => {
         nextPage: page + 1,
         previousPage: page - 1,
         lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
+        deletedCount: deletedCount // Truyền deletedCount vào hàm res.render
       });
     })
     .catch(err => {
@@ -186,6 +191,8 @@ exports.getProducts = (req, res, next) => {
       return next(error);
     });
 };
+
+
 
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
@@ -215,7 +222,7 @@ exports.postForceDeleteProduct = (req, res, next) => {
 };
 
 
-exports.getTrashProduct = (req, res, next) => {
+exports.getTrashProducts = (req, res, next) => {
   const page = +req.query.page || 1;
   let totalItems;
 
