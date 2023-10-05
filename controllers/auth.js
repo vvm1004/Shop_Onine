@@ -285,6 +285,3 @@ exports.postNewPassword = (req, res, next) => {
     });
 };
 
-// exports.getGoogle = () => {
-//   passport.authenticate('google', { scope: ['profile'] });
-// };
