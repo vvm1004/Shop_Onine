@@ -28,10 +28,12 @@
     "mongoose": "^7.5.3",
     "mongoose-delete": "^1.0.1",
     "mongoose-findorcreate": "^4.0.0",
+    "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.5",
     "passport": "^0.6.0",
     "passport-google-oauth20": "^2.0.0",
     "pdfkit": "^0.13.0",
-    "stripe": "^13.8.0"
+    "stripe": "^13.8.0",
+    "uuid": "^9.0.1"
   }
 }
