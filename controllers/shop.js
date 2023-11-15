@@ -6,7 +6,7 @@ const fs = require('fs');
 const PDFDocument = require('pdfkit');
 
 
-const stripe = require('stripe')('sk_test_51NveJKEz8E4dFYRvHakbIguDHNgX0TWLdta9OUc6pbjPoxjSTi0ocySgBu141ZVId5rG2I593DEvifUcLfJHvy9400hrZBT7Cj');
+const stripe = require('stripe')(process.env.STRIPE_KEY);
 
 
 const ITEMS_PER_PAGE = 2;

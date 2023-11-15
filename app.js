@@ -1,5 +1,8 @@
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config()
+const https = require('https');
+
 
 
 const express = require('express');
@@ -13,40 +16,45 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const multer = require('multer')
 const { v4: uuidv4 } = require('uuid');
-
+const helmet = require('helmet');
+const compression = require('compression')
+const morgan = require('morgan');
 
 
 const errorController = require('./controllers/error');
 const User = require('./models/user');
 
 const app = express();
-const MONGODB_URL = 'mongodb+srv://vvm1004:test123@cluster0.4a2h5sc.mongodb.net/shop?retryWrites=true&w=majority';
 const store = new MongoDBStore({
-  uri: MONGODB_URL,
+  uri: process.env.MONGODB_URL,
+  // uri: 'mongodb://127.0.0.1:27017/shop',
   collection: 'sessions'
 });
 
 const csrfProtection = csrf();
 
+// const privateKey = fs.readFileSync('server.key');
+// const certificate = fs.readFileSync('server.cert');
+
 const fileStorage = multer.diskStorage({
-  destination: function(req, file, cb) {
-      cb(null, 'images');
+  destination: function (req, file, cb) {
+    cb(null, 'images');
   },
-  filename: function(req, file, cb) {
-      cb(null, uuidv4())
+  filename: function (req, file, cb) {
+    cb(null, uuidv4())
   }
 });
 
 const fileFilter = (req, file, cb) => {
-if (
-  file.mimetype === 'image/png' ||
-  file.mimetype === 'image/jpg' ||
-  file.mimetype === 'image/jpeg'
-) {
-  cb(null, true);
-} else {
-  cb(null, false);
-}
+  if (
+    file.mimetype === 'image/png' ||
+    file.mimetype === 'image/jpg' ||
+    file.mimetype === 'image/jpeg'
+  ) {
+    cb(null, true);
+  } else {
+    cb(null, false);
+  }
 };
 
 app.set('view engine', 'ejs');
@@ -56,6 +64,14 @@ const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
 
+const accessLogStream = fs.createWriteStream(
+  path.join(__dirname, 'access.log'),
+  { flags: 'a' }
+);
+
+app.use(helmet());
+app.use(compression());
+app.use(morgan('combined', { stream: accessLogStream }));
 
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -98,14 +114,14 @@ passport.deserializeUser(function (user, cb) {
 });
 
 passport.use(new GoogleStrategy({
-  clientID: "270534234511-uhqj3m81aej8ehfjjemmi2bog6c0p100.apps.googleusercontent.com",
-  clientSecret: "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",
+  clientID: process.env.CLIENT_ID,
+  clientSecret: process.env.CLIENT_SECRET,
   callbackURL: "http://localhost:3000/auth/google/shop_online",
   userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo",
   scope: ['profile']
 },
   function (accessToken, refreshToken, profile, cb) {
-    User.findOrCreate({ googleId: profile.id}, function (err, user) {     
+    User.findOrCreate({ googleId: profile.id }, function (err, user) {
       return cb(err, user);
     });
   }
@@ -147,9 +163,9 @@ app.get('/auth/google/shop_online',
     const userId = req.user._id;
     User.findById(userId)
       .then((user) => {
-          req.session.isLoggedIn = true;
-          req.session.user = user;
-          res.redirect('/');
+        req.session.isLoggedIn = true;
+        req.session.user = user;
+        res.redirect('/');
       })
       .catch(err => {
         const error = new Error(err);
@@ -195,10 +211,14 @@ app.use((error, req, res, next) => {
 //   });
 // });
 
-mongoose.connect(MONGODB_URL)
-  // mongoose.connect("mongodb://127.0.0.1:27017/shop")
+mongoose.connect(process.env.MONGODB_URL)
+  //  mongoose.connect("mongodb://127.0.0.1:27017/shop")
   .then(result => {
-    app.listen(process.env.PORT || 3000)
+    //openssl req -nodes -new -x509 -keyout server.key -out server.cert
+    // https
+    //   .createServer({ key: privateKey, cert: certificate }, app)
+    //   .listen(process.env.PORT || 3000);
+     app.listen(process.env.PORT || 3000)
   })
   .catch(err => {
     console.log(err)
