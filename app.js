@@ -116,7 +116,7 @@ passport.deserializeUser(function (user, cb) {
 passport.use(new GoogleStrategy({
   clientID: process.env.CLIENT_ID,
   clientSecret: process.env.CLIENT_SECRET,
-  callbackURL: "http://localhost:3000/auth/google/shop_online",
+  callbackURL: "http://shop-online2.onrender.com/auth/google/shop_online",
   userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo",
   scope: ['profile']
 },
